@@ -118,8 +118,8 @@ def gallery():
         g.append(monitor(cx, 452, 250, 118, bot_acc))
         return "".join(g)
 
-    b.append(group(300, "BEFORE", [BLUE, ORANGE], [GREEN, BLUE]))
-    b.append(group(980, "AFTER",  [GREEN, BLUE], [BLUE, ORANGE]))
+    b.append(group(300, "BEFORE", [BLUE, BLUE], [ORANGE, ORANGE]))
+    b.append(group(980, "AFTER",  [ORANGE, ORANGE], [BLUE, BLUE]))
     # center swap glyph + caption
     b.append(swap_arrows(640, 400, span=150, thick=18, color=ARROW, mid=12, bow=64))
     b.append(f'<text x="640" y="512" font-family="Inter" font-weight="600" font-size="22" fill="{TEXT}" text-anchor="middle">one keystroke</text>')
