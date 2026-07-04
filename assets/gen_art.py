@@ -29,10 +29,10 @@ def window(x, y, w, h, accent):
     parts = [rrect(x, y, w, h, r, WIN)]
     # title bar (rounded top only -> draw full rrect accent then body over lower part)
     parts.append(f'<path d="M{x+r},{y} h{w-2*r} a{r},{r} 0 0 1 {r},{r} v{tb-r} h{-w} v{-(tb-r)} a{r},{r} 0 0 1 {r},{-r} z" fill="{accent}"/>')
-    # dots
+    # window controls: three dots at the top-RIGHT (KDE convention, not Mac's left)
     cy = y + tb/2
     for i in range(3):
-        parts.append(f'<circle cx="{x+10+i*11}" cy="{cy:.1f}" r="2.6" fill="{WIN}" opacity="0.9"/>')
+        parts.append(f'<circle cx="{x+w-10-i*11:.1f}" cy="{cy:.1f}" r="2.6" fill="{WIN}" opacity="0.9"/>')
     return "".join(parts)
 
 def monitor(cx, top, sw, sh, accents, panel=False):
@@ -94,8 +94,8 @@ def logo():
         <stop offset="0" stop-color="{BG0}"/><stop offset="1" stop-color="{BG1}"/>
       </linearGradient></defs>''')
     body.append(rrect(0, 0, W, W, 112, "url(#bg)"))
-    body.append(monitor(256, 92, 300, 104, [BLUE, ORANGE]))
-    body.append(monitor(256, 320, 300, 104, [ORANGE, BLUE]))
+    body.append(monitor(256, 92, 300, 104, [BLUE, BLUE]))
+    body.append(monitor(256, 320, 300, 104, [ORANGE, ORANGE]))
     body.append(swap_arrows(256, 268, span=98, thick=11, color=WIN, mid=11, bow=38))
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{W}" viewBox="0 0 {W} {W}">' + "".join(body) + '</svg>'
     open(f"{OUT}/logo.svg", "w").write(svg)
