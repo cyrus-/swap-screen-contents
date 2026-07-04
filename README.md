@@ -18,8 +18,11 @@ by (or floating over) a panel when it lands on a screen with a different usable 
 - Handles any monitor arrangement (side-by-side, stacked, mixed) and differing
   resolutions/scales — geometry is mapped on both axes relative to each screen's
   work area.
-- Full-size windows are trimmed/expanded to fit; partial windows keep their size and
-  relative position. Maximized/fullscreen windows are re-fit by KWin.
+- Windows are refit to the destination's usable area: any window taller than the
+  target screen's available height is shrunk to fit (e.g. when one screen has a panel
+  and another doesn't), and a window that filled its source screen is expanded/trimmed
+  to fill the target. Smaller windows keep their size and relative position.
+  Maximized/fullscreen windows are re-fit by KWin.
 - Zero configuration.
 
 ## Install
@@ -43,11 +46,13 @@ kwriteconfig6 --file kwinrc --group Plugins --key swap-screen-contentsEnabled tr
 
 1. System Settings → Window Management → **KWin Scripts** → enable **Swap Screen Contents**.
 2. System Settings → Keyboard → **Shortcuts** → search **"Swap / rotate screen contents"**
-   and assign a key (e.g. `Meta+Ctrl+Up`). Optionally bind
-   **"Rotate screen contents (reverse direction)"** too (e.g. `Meta+Ctrl+Down`).
+   and assign a shortcut of your choice. The actions ship with **no default binding**,
+   so nothing of KDE's is overridden until you pick one. Optionally bind **"Rotate
+   screen contents (reverse direction)"** too.
 
-> Tip: on a single row of virtual desktops, the vertical desktop-switch shortcuts
-> (`Meta+Ctrl+Up`/`Down`) are unused and make natural bindings.
+> Tip: if you *don't* use a two-dimensional grid of virtual desktops, KDE's vertical
+> desktop-switch shortcuts (`Meta+Ctrl+Up`/`Down`) are effectively free on your system
+> and make intuitive bindings — but leave them be if you navigate desktops in 2D.
 
 ## How it works
 

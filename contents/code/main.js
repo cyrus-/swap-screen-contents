@@ -44,15 +44,18 @@ function visibleWindows(screen, desktop) {
     return out;
 }
 
-// Is a window "full" along an axis (fills the work-area extent within tolerance)?
+// Is a window "full" along an axis (fills the source work-area extent within tolerance)?
 function isFull(len, full) { return Math.abs(len - full) <= Math.max(8, full * 0.02); }
 
-// Map one axis (x/width or y/height) from the source work area to the destination.
-// Full extent -> fill (trim/expand); otherwise keep size (clamped) at the same
-// fractional offset. Works for any relative monitor placement or resolution.
+// Map one axis (x/width or y/height) from the source work area to the destination:
+//  - a window that filled the source is expanded/trimmed to fill the destination;
+//  - any other window keeps its size but is SHRUNK to fit if it exceeds the
+//    destination extent, then placed at the same fractional offset.
+// No window ever ends up larger than the destination work area. Works for any
+// relative monitor placement, resolution, or scale.
 function mapAxis(pos, size, srcPos, srcExt, dstPos, dstExt) {
     if (isFull(size, srcExt)) return [dstPos, dstExt];
-    var newSize = Math.min(size, dstExt);
+    var newSize = Math.min(size, dstExt);   // shrink-to-fit: never exceed the target
     var frac = srcExt > 0 ? (pos - srcPos) / srcExt : 0;
     var newPos = dstPos + frac * dstExt;
     if (newPos + newSize > dstPos + dstExt) newPos = dstPos + dstExt - newSize;
