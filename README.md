@@ -3,6 +3,8 @@
 A KWin script for KDE Plasma 6 that **swaps** (two monitors) or **rotates** (three
 or more) the windows visible on each screen, in one keystroke.
 
+📦 **KDE Store:** https://www.opendesktop.org/p/2364570/
+
 Unlike the older "move all windows to the next screen" scripts, this one is built
 for **Plasma 6.7 per-output virtual desktops**: it only moves the windows on each
 screen's *currently-active* desktop, and reassigns each moved window to the
