@@ -68,18 +68,20 @@ def swap_arrows(cx, cy, span, thick, color, mid, bow):
     x1 = cx - mid        # up-arrow tip column (left)
     x2 = cx + mid        # down-arrow tip column (right)
     d = span * 0.34      # control offset that forces a vertical tangent at the tip
-    mw = thick * 2.6     # arrowhead size (user units)
     mkid = "ah" + color.lstrip('#')
-    marker = (f'<defs><marker id="{mkid}" markerUnits="userSpaceOnUse" '
-              f'markerWidth="{mw}" markerHeight="{mw}" viewBox="0 0 10 10" refX="6.2" refY="5" '
-              f'orient="auto"><path d="M0.5,1 L9.3,5 L0.5,9 L3.4,5 Z" fill="{color}"/></marker></defs>')
+    # markerUnits defaults to "strokeWidth": the head is defined in multiples of the
+    # line width, so it always scales with the stroke. Solid triangle, base (10 units
+    # ~ 2.8x stroke) wider than the shaft (1 stroke), so the line can't poke past it.
+    marker = (f'<defs><marker id="{mkid}" viewBox="0 0 10 10" refX="6" refY="5" '
+              f'markerWidth="2.8" markerHeight="2.8" orient="auto">'
+              f'<path d="M0,0 L10,5 L0,10 Z" fill="{color}"/></marker></defs>')
     # up arrow: bottom -> top, bows left, tangent vertical at the top tip
     up = (f'<path d="M{x1},{bot} C{x1-bow},{cy} {x1},{top+d} {x1},{top}" '
-          f'fill="none" stroke="{color}" stroke-width="{thick}" stroke-linecap="butt" '
+          f'fill="none" stroke="{color}" stroke-width="{thick}" stroke-linecap="round" '
           f'marker-end="url(#{mkid})"/>')
     # down arrow: top -> bottom, bows right, tangent vertical at the bottom tip
     dn = (f'<path d="M{x2},{top} C{x2+bow},{cy} {x2},{bot-d} {x2},{bot}" '
-          f'fill="none" stroke="{color}" stroke-width="{thick}" stroke-linecap="butt" '
+          f'fill="none" stroke="{color}" stroke-width="{thick}" stroke-linecap="round" '
           f'marker-end="url(#{mkid})"/>')
     return marker + up + dn
 
@@ -94,7 +96,7 @@ def logo():
     body.append(rrect(0, 0, W, W, 112, "url(#bg)"))
     body.append(monitor(256, 92, 300, 104, [BLUE, ORANGE]))
     body.append(monitor(256, 320, 300, 104, [ORANGE, BLUE]))
-    body.append(swap_arrows(256, 268, span=96, thick=15, color=WIN, mid=9, bow=44))
+    body.append(swap_arrows(256, 268, span=98, thick=11, color=WIN, mid=11, bow=38))
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{W}" viewBox="0 0 {W} {W}">' + "".join(body) + '</svg>'
     open(f"{OUT}/logo.svg", "w").write(svg)
 
