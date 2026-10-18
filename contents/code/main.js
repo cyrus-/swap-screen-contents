@@ -7,10 +7,30 @@
 // panel-aware work area, so full-size windows are trimmed/expanded rather than
 // clipped or left floating over a panel.
 //
+// Options (System Settings → KWin Scripts → Configure): include minimized
+// windows, include windows shown on all desktops, keep focus on the current
+// screen (activating the most recently used window arriving there), and exclude
+// screens by output name — excluded screens are left alone and the rest rotate
+// among themselves.
+//
 // Copyright (C) 2026 Cyrus Omar
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 var MAXIMIZE_AREA = 2; // workspace.clientArea() option: panel-aware "maximize" rect
+
+// Read on every invocation, so new values apply as soon as KWin reloads its config.
+// Apply in the config dialog alone doesn't trigger that reload for scripts
+// (KDE bug 505251): toggle the script or run `qdbus6 org.kde.KWin /KWin reconfigure`.
+function loadConfig() {
+    var excluded = String(readConfig("ExcludedScreens", "")).split(/[\s,]+/)
+        .filter(function (name) { return name.length > 0; });
+    return {
+        includeMinimized: readConfig("IncludeMinimized", false),
+        includeAllDesktops: readConfig("IncludeAllDesktops", true),
+        keepFocusOnScreen: readConfig("KeepFocusOnScreen", false),
+        excluded: excluded
+    };
+}
 
 function workArea(screen, desktop) { return workspace.clientArea(MAXIMIZE_AREA, screen, desktop); }
 
@@ -24,22 +44,24 @@ function screenDesktop(screen) {
 
 function onScreen(w, s) { return w.output && w.output.name === s.name; }
 
-function onActiveDesktop(w, d) {
-    if (w.onAllDesktops) return true;
+function onActiveDesktop(w, d, cfg) {
+    if (w.onAllDesktops) return cfg.includeAllDesktops;
     var ds = w.desktops || [];
     for (var i = 0; i < ds.length; i++) if (ds[i].id === d.id) return true;
     return false;
 }
 
-function movable(w) {
-    return w.normalWindow && !w.minimized && w.moveableAcrossScreens !== false;
+function movable(w, cfg) {
+    return w.normalWindow && (cfg.includeMinimized || !w.minimized)
+        && w.moveableAcrossScreens !== false;
 }
 
-function visibleWindows(screen, desktop) {
-    var out = [], all = workspace.windowList();
+// Returned in stacking order, bottom → top.
+function visibleWindows(screen, desktop, cfg) {
+    var out = [], all = workspace.stackingOrder;
     for (var i = 0; i < all.length; i++) {
         var w = all[i];
-        if (movable(w) && onScreen(w, screen) && onActiveDesktop(w, desktop)) out.push(w);
+        if (movable(w, cfg) && onScreen(w, screen) && onActiveDesktop(w, desktop, cfg)) out.push(w);
     }
     return out;
 }
@@ -78,29 +100,98 @@ function relocate(w, srcArea, dstArea, dstScreen, dstDesktop) {
     if (!w.onAllDesktops) w.desktops = [dstDesktop];
 }
 
+// Focus history, most recent first. KWin's own focus chain isn't exposed to
+// scripts, so record activations here. Reset on every script load and seeded
+// from the stacking order, which approximates recency until real activations
+// come in.
+var MRU_MAX = 64, mru = [];
+
+function forget(w) {
+    var i = mru.indexOf(w);
+    if (i >= 0) mru.splice(i, 1);
+}
+
+function touch(w) {
+    if (!w) return;
+    forget(w);
+    mru.unshift(w);
+    if (mru.length > MRU_MAX) mru.length = MRU_MAX;
+}
+
+// The most recently used focusable window of a group (bottom → top). Falls back
+// to the topmost one when none of them has been seen activating.
+function focusTarget(group) {
+    var best = null, bestRank = -1;
+    for (var i = 0; i < group.length; i++) {
+        var w = group[i];
+        if (w.minimized || w.wantsInput === false) continue;
+        var rank = mru.indexOf(w);
+        if (rank < 0) rank = MRU_MAX + group.length - i;   // unseen: rank below seen ones, topmost first
+        if (!best || rank < bestRank) { best = w; bestRank = rank; }
+    }
+    return best;
+}
+
 // Rotate each screen's visible windows to the next screen (dir = +1 / -1).
 // With exactly two screens this is a straight swap in either direction.
+// Excluded screens are skipped entirely.
 function rotate(dir) {
-    var screens = workspace.screens, n = screens.length;
+    var cfg = loadConfig();
+    var screens = [], all = workspace.screens;
+    for (var j = 0; j < all.length; j++) {
+        if (cfg.excluded.indexOf(all[j].name) < 0) screens.push(all[j]);
+    }
+    var n = screens.length;
     if (n < 2) return;
 
     var desk = [], area = [], wins = [];
     for (var i = 0; i < n; i++) {
         desk[i] = screenDesktop(screens[i]);
         area[i] = workArea(screens[i], desk[i]);
-        wins[i] = visibleWindows(screens[i], desk[i]);   // snapshot ALL before moving anything
+        wins[i] = visibleWindows(screens[i], desk[i], cfg);   // snapshot ALL before moving anything
     }
+
+    // Keep focus on the active screen: choose among the windows arriving there.
+    // Pick from this pre-move snapshot; window outputs may lag right after moving.
+    var target = null, active = workspace.activeWindow;
+    if (cfg.keepFocusOnScreen && active) {
+        for (var a = 0; a < n; a++) {
+            if (onScreen(active, screens[a])) {
+                target = focusTarget(wins[((a - dir) % n + n) % n]);
+                break;
+            }
+        }
+    }
+
     for (var s = 0; s < n; s++) {
         var t = ((s + dir) % n + n) % n;
         for (var k = 0; k < wins[s].length; k++) {
             relocate(wins[s][k], area[s], area[t], screens[t], desk[t]);
         }
     }
+    if (target) workspace.activeWindow = target;
 }
 
+// Key auto-repeat fires the shortcut many times per second, faster than clients
+// apply the previous move. Rate-limit: ignore any press within COOLDOWN_MS of the
+// last swap, so a held key swaps at a steady pace and every swap can settle.
+var COOLDOWN_MS = 200, lastSwap = 0;
+function onPress(dir) {
+    var now = Date.now();
+    if (now - lastSwap < COOLDOWN_MS) return;
+    lastSwap = now;
+    rotate(dir);
+}
+
+var seed = workspace.stackingOrder;
+for (var i = 0; i < seed.length; i++) if (seed[i].normalWindow) touch(seed[i]);
+touch(workspace.activeWindow);
+workspace.windowActivated.connect(touch);
+workspace.windowRemoved.connect(forget);
+
 registerShortcut("SwapScreenContents",
-    "Swap / rotate screen contents", "",
-    function () { rotate(1); });
+    "Swap Screen Contents (forward)", "",
+    function () { onPress(1); });
 registerShortcut("SwapScreenContentsReverse",
-    "Rotate screen contents (reverse direction)", "",
-    function () { rotate(-1); });
+    "Swap Screen Contents (reverse)", "",
+    function () { onPress(-1); });

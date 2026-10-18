@@ -2,7 +2,7 @@
     "KPlugin": {
         "Id": "swap-screen-contents",
         "Name": "Swap Screen Contents",
-        "Description": "Swap (2 monitors) or rotate (3+) the windows on each screen's active virtual desktop. Respects Plasma 6.7 per-output desktops and refits windows to each screen's panel-aware work area.",
+        "Description": "Swap (2 monitors) or rotate (3+) the windows on each screen's active virtual desktop.",
         "Icon": "preferences-system-windows",
         "Authors": [
             { "Name": "Cyrus Omar" }
@@ -16,5 +16,6 @@
     },
     "X-Plasma-API": "javascript",
     "X-Plasma-MainScript": "code/main.js",
-    "KPackageStructure": "KWin/Script"
+    "KPackageStructure": "KWin/Script",
+    "X-KDE-ConfigModule": "kwin/effects/configs/kcm_kwin4_genericscripted"
 }

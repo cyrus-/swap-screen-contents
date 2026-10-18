@@ -25,7 +25,8 @@ by (or floating over) a panel when it lands on a screen with a different usable 
   and another doesn't), and a window that filled its source screen is expanded/trimmed
   to fill the target. Smaller windows keep their size and relative position.
   Maximized/fullscreen windows are re-fit by KWin.
-- Zero configuration.
+- Optional settings: include minimized windows, include windows shown on all
+  desktops, keep focus on the current screen, and exclude specific screens (see [Configuration](#configuration)).
 
 ## Install
 
@@ -47,14 +48,41 @@ kwriteconfig6 --file kwinrc --group Plugins --key swap-screen-contentsEnabled tr
 ## Enable & bind a shortcut
 
 1. System Settings → Window Management → **KWin Scripts** → enable **Swap Screen Contents**.
-2. System Settings → Keyboard → **Shortcuts** → search **"Swap / rotate screen contents"**
-   and assign a shortcut of your choice. The actions ship with **no default binding**,
-   so nothing of KDE's is overridden until you pick one. Optionally bind **"Rotate
-   screen contents (reverse direction)"** too.
+2. System Settings → Keyboard → **Shortcuts** → search **"swap"** and assign a shortcut
+   to **"Swap Screen Contents (forward)"**. The actions ship with **no
+   default binding**, so nothing of KDE's is overridden until you pick one. Optionally
+   bind **"Swap Screen Contents (reverse)"** too.
 
 > Tip: if you *don't* use a two-dimensional grid of virtual desktops, KDE's vertical
 > desktop-switch shortcuts (`Meta+Ctrl+Up`/`Down`) are effectively free on your system
 > and make intuitive bindings — but leave them be if you navigate desktops in 2D.
+
+## Configuration
+
+System Settings → Window Management → KWin Scripts → **Swap Screen Contents** →
+*Configure…*:
+
+- **Include minimized windows** (off by default): minimized windows move too, and
+  stay minimized.
+- **Include windows shown on all desktops** (on by default): when off, windows pinned
+  to all desktops stay where they are.
+- **Keep focus on the current screen** (off by default): after a swap, focus stays on
+  the screen you were on and goes to the most recently used of the windows that just
+  arrived there, instead of following the focused window to its new screen. The
+  script records focus history itself (KWin doesn't expose its own to scripts), so
+  history starts over whenever the script or KWin restarts. Until then, the stacking
+  order stands in for it.
+- **Excluded screens**: comma-separated output names (list them with
+  `kscreen-doctor -o`, e.g. `DP-2, HDMI-A-1`). Windows on excluded screens are left
+  alone and the remaining screens swap / rotate among themselves; with fewer than two
+  screens left the shortcut does nothing.
+
+Shortcuts aren't set here. KDE manages them in the Shortcuts settings (see above).
+
+> **Note:** *Apply* in the Configure dialog doesn't notify running scripts — a KWin
+> limitation ([KDE bug 505251](https://bugs.kde.org/show_bug.cgi?id=505251)). After
+> changing settings, disable and re-enable the script, or run
+> `qdbus6 org.kde.KWin /KWin reconfigure`.
 
 ## How it works
 

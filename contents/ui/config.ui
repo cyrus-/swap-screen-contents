@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SwapScreenContentsConfigForm</class>
+ <widget class="QWidget" name="SwapScreenContentsConfigForm">
+  <property name="windowTitle">
+   <string>Swap Screen Contents</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
+   <item row="0" column="0">
+    <widget class="QLabel" name="windowsLabel">
+     <property name="text">
+      <string>Windows:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QCheckBox" name="kcfg_IncludeMinimized">
+     <property name="text">
+      <string>Include minimized windows (they stay minimized)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QCheckBox" name="kcfg_IncludeAllDesktops">
+     <property name="text">
+      <string>Include windows shown on all desktops</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <spacer name="sectionGap2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>4</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="focusLabel">
+     <property name="text">
+      <string>Focus:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="kcfg_KeepFocusOnScreen">
+     <property name="text">
+      <string>Keep focus on the current screen</string>
+     </property>
+     <property name="toolTip">
+      <string>After a swap, activate the most recently used window that arrived on the screen you were on, instead of following the focused window to its new screen.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <spacer name="sectionGap4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>4</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="excludedLabel">
+     <property name="text">
+      <string>Excluded screens:</string>
+     </property>
+     <property name="buddy">
+      <cstring>kcfg_ExcludedScreens</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <layout class="QVBoxLayout" name="excludedLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLineEdit" name="kcfg_ExcludedScreens">
+       <property name="placeholderText">
+        <string>e.g. DP-2, HDMI-A-1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="excludedHelp">
+       <property name="styleSheet">
+        <string>color: palette(placeholder-text);</string>
+       </property>
+       <property name="text">
+        <string>Comma-separated output names (run &lt;code&gt;kscreen-doctor -o&lt;/code&gt; to list them). Windows on excluded screens are left alone; the remaining screens swap / rotate among themselves.</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <spacer name="sectionGap6">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>4</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="shortcutsLabel">
+     <property name="text">
+      <string>Shortcuts:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTop</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="shortcutsHelp">
+     <property name="text">
+      <string>Set in System Settings → Keyboard → Shortcuts → KWin. Search for “swap” to find both “Swap Screen Contents” actions. No keys are bound by default.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <spacer name="sectionGap8">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>4</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="9" column="0" colspan="2">
+    <widget class="QLabel" name="reloadNote">
+     <property name="text">
+      <string>&lt;b&gt;Note:&lt;/b&gt; due to a KWin limitation, changes take effect only after the script is disabled and re-enabled, or after running &lt;code&gt;qdbus6 org.kde.KWin /KWin reconfigure&lt;/code&gt;.</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
